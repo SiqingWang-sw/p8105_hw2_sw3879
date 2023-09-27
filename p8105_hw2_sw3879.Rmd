@@ -5,3 +5,22 @@ date: "2023-09-27"
 output: github_document
 ---
 
+Importing libraries
+```{r}
+library(tidyverse)
+library(tidyr)
+```
+## Problem 1 
+
+Read the pols-month csv into a dataframe and clean up data 
+
+```{r}
+pols_month_df = 
+  read_csv("data/pols-month.csv") |> 
+  janitor::clean_names() |> 
+  separate(mon, into = c("year", "month", "day"), sep = "-") |> 
+  mutate(
+    month = month.name(as.integer(month))
+    )
+```
+
