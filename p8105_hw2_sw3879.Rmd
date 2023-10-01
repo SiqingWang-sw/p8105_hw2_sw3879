@@ -11,7 +11,7 @@ library(tidyverse)
 ```
 ## Problem 1 
 
-Read the pols-month csv into a dataframe and clean up data 
+Read `pols-month.csv` into a dataframe and clean up data 
 
 ```{r}
 pols_month_df = 
@@ -26,4 +26,37 @@ pols_month_df =
   ) |> 
   select(-day, -prez_gop, -prez_dem)
 ```
+
+Cleaning data in `snp.csv`
+```{r}
+snp_df = 
+  read_csv("data/snp.csv") |> 
+  janitor::clean_names() |> 
+  mutate(
+    date = format(as.Date(date, format = "%m/%d/%y"), "%Y/%m/%d")
+  ) |> 
+  separate(date, into = c("year", "month", "day"), sep = "/") |> 
+  mutate(
+    month = month.name[as.numeric(month)],
+    year = as.numeric(year),
+    year = ifelse(year > 2023, year - 100, year)
+  ) |> 
+  select(-day)
+```
+
+Pivoting `unemployment.csv` to long format
+```{r}
+unemployment_df = 
+  read_csv("data/unemployment.csv") |> 
+  janitor::clean_names() |> 
+  pivot_longer(
+    jan:dec,
+    names_to = "month",
+    values_to = "unemployment"
+  ) |> 
+  mutate(
+    month = month.name[match(month, tolower(month.abb))]
+  )
+```
+
 
