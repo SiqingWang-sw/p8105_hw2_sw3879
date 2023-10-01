@@ -8,7 +8,6 @@ output: github_document
 Importing libraries
 ```{r}
 library(tidyverse)
-library(tidyr)
 ```
 ## Problem 1 
 
@@ -20,7 +19,11 @@ pols_month_df =
   janitor::clean_names() |> 
   separate(mon, into = c("year", "month", "day"), sep = "-") |> 
   mutate(
-    month = month.name(as.integer(month))
+    month = month.name[as.numeric(month)],
+    president = ifelse(
+      prez_gop > prez_dem, "gop", "dem"
     )
+  ) |> 
+  select(-day, -prez_gop, -prez_dem)
 ```
 
