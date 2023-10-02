@@ -80,10 +80,10 @@ trash_wheel_df =
    janitor::clean_names() |>
   drop_na(dumpster) |> 
   select(-x15, -x16) |> 
-  rename(homes_powered_old = homes_powered) |> 
   mutate(
     homes_powered = (weight_tons*500)/30,
-    trash_wheel_name = "Mr. Trash Wheel"
+    trash_wheel_name = "Mr. Trash Wheel",
+    year = as.numeric(year)
   )
 ```
 
@@ -94,10 +94,10 @@ gwynnda_trash_wheel_df =
                      sheet = "Gwynnda Trash Wheel", skip = 1) |> 
    janitor::clean_names() |>
   drop_na(dumpster) |> 
-  rename(homes_powered_old = homes_powered) |> 
   mutate(
     homes_powered = (weight_tons*500)/30,
-    trash_wheel_name = "Gwynnda Trash Wheel"
+    trash_wheel_name = "Gwynnda Trash Wheel",
+    year = as.numeric(year)
   )
 
 prof_trash_wheel_df = 
@@ -105,12 +105,29 @@ prof_trash_wheel_df =
                      sheet = "Professor Trash Wheel", skip = 1) |> 
    janitor::clean_names() |>
   drop_na(dumpster) |> 
-  rename(homes_powered_old = homes_powered) |> 
   mutate(
     homes_powered = (weight_tons*500)/30,
-    trash_wheel_name = "Professor Trash Wheel"
+    trash_wheel_name = "Professor Trash Wheel",
+    year = as.numeric(year)
   )
 ```
+
+Combining three datasets
+```{r}
+trashwheel_master = bind_rows(trash_wheel_df, prof_trash_wheel_df, gwynnda_trash_wheel_df)
+```
+
+TO DO: add descriptions to datasets 
+
+The combined master datasets for trash wheel has `r nrow(trashwheel_master)` rows and `r ncol(trashwheel_master)` columns. 
+
+The total weight of trash collected by Professor trash wheel is 
+`r subset(trashwheel_master, trash_wheel_name == "Professor Trash Wheel") |> pull(weight_tons) |> sum()` tons.
+
+the total number of cigarette butts collected by Gwynnda in July of 2021 is 
+`r subset(gwynnda_trash_wheel_df, year == 2021 & month == "July") |> pull(cigarette_butts) |> sum()`.
+
+
 
 
 
