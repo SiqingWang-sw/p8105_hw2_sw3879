@@ -127,6 +127,33 @@ The total weight of trash collected by Professor trash wheel is
 the total number of cigarette butts collected by Gwynnda in July of 2021 is 
 `r subset(gwynnda_trash_wheel_df, year == 2021 & month == "July") |> pull(cigarette_butts) |> sum()`.
 
+## Problem 3
+```{r}
+baseline = 
+  read_csv("data/MCI_baseline.csv", skip = 1) |> 
+  janitor::clean_names() |> 
+  mutate(
+    sex = case_match(
+      sex,
+      1 ~ "male",
+      0 ~ "female"
+    ),
+    apoe4 = case_match(
+      apoe4,
+      1 ~ "carrier",
+      0 ~ "non-carrier"
+    )
+  ) |> 
+  filter(age_at_onset == "." | age_at_onset > current_age)
+```
+
+`r nrow(baseline)` were recruited at baseline. 
+`r filter(baseline, age_at_onset != ".") |> nrow()` participants developed MCI during the study.
+The average baseline age is `r mean(pull(baseline, current_age)) |> round(digits = 0)`.
+Proportion of women who are APOE 4 carrier is 
+`r nrow(filter(baseline, sex == "female" & apoe4 =="carrier")) / nrow(filter(baseline, sex == "female"))`
+
+
 
 
 
