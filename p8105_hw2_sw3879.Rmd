@@ -125,7 +125,7 @@ The total weight of trash collected by Professor trash wheel is
 `r subset(trashwheel_master, trash_wheel_name == "Professor Trash Wheel") |> pull(weight_tons) |> sum()` tons.
 
 the total number of cigarette butts collected by Gwynnda in July of 2021 is 
-`r subset(gwynnda_trash_wheel_df, year == 2021 & month == "July") |> pull(cigarette_butts) |> sum()`.
+`r subset(gwynnda_trash_wheel_df, year == 2021 & month == "July") |> pull(cigarette_butts) |> sum() |> as.integer()`.
 
 ## Problem 3
 Reading in baseline csv
@@ -149,16 +149,19 @@ baseline =
 ```
 
 `r nrow(baseline)` were recruited at baseline. 
+
 `r filter(baseline, age_at_onset != ".") |> nrow()` participants developed MCI during the study.
+
 The average baseline age is `r mean(pull(baseline, current_age)) |> round(digits = 0)`.
+
 Proportion of women who are APOE 4 carrier is 
-`r nrow(filter(baseline, sex == "female" & apoe4 =="carrier")) / nrow(filter(baseline, sex == "female"))`
+`r scales::percent(nrow(filter(baseline, sex == "female" & apoe4 =="carrier")) / nrow(filter(baseline, sex == "female")))`.
 
 ```{r}
 amyloid = 
   read_csv("data/mci_amyloid.csv", skip = 1) |> 
   janitor::clean_names() |> 
-  rename("id" = "study_id") |> 
+  rename("id" = "study_id")
 ```
 
 Merge the longitudinal dataset with baseline, keeping all participants in both datasets
@@ -176,6 +179,8 @@ Merge the longitudinal dataset with baseline to keep those in both datasets
 amyloid_both = 
   inner_join(baseline, amyloid, by = c("id"))
 ```
+
+There are `r nrow(amyloid_both)` participants that are in both the baseline and longitudinal visit datasets, and there are `r ncol(amyloid_both)` columns. 
 
 TO DO ask TA:
 
