@@ -128,6 +128,7 @@ the total number of cigarette butts collected by Gwynnda in July of 2021 is
 `r subset(gwynnda_trash_wheel_df, year == 2021 & month == "July") |> pull(cigarette_butts) |> sum()`.
 
 ## Problem 3
+Reading in baseline csv
 ```{r}
 baseline = 
   read_csv("data/MCI_baseline.csv", skip = 1) |> 
@@ -152,6 +153,35 @@ baseline =
 The average baseline age is `r mean(pull(baseline, current_age)) |> round(digits = 0)`.
 Proportion of women who are APOE 4 carrier is 
 `r nrow(filter(baseline, sex == "female" & apoe4 =="carrier")) / nrow(filter(baseline, sex == "female"))`
+
+```{r}
+amyloid = 
+  read_csv("data/mci_amyloid.csv", skip = 1) |> 
+  janitor::clean_names() |> 
+  rename("id" = "study_id") |> 
+```
+
+Merge the longitudinal dataset with baseline, keeping all participants in both datasets
+```{r}
+amyloid_full = 
+  full_join(baseline, amyloid, by = c("id"))
+```
+
+There are `r nrow(amyloid_full) - nrow(baseline)` participants in the baseline set but not in the amyloid set. 
+
+There are `r nrow(amyloid_full) - nrow(amyloid)` participants in the amyloid set but not in the baseline set. 
+
+Merge the longitudinal dataset with baseline to keep those in both datasets
+```{r}
+amyloid_both = 
+  inner_join(baseline, amyloid, by = c("id"))
+```
+
+TO DO ask TA:
+
+1. Check whether some participants appear in only the baseline or amyloid datasets. Should we include participants who are ineligible?
+
+2. Similarly, import, clean, and tidy the dataset of longitudinally observed biomarker value. Should we remove rows with missing value in a timepoint? 
 
 
 
