@@ -12,9 +12,9 @@ library(dplyr)
 ```
 ## Problem 1 
 
-Read `pols-month.csv` into a dataframe and clean up data 
+Read `pols-month.csv` into a dataframe and clean up data by adding the president variable, updating month names, and removing unnessary variables 
 
-```{r, message = FALSE}
+```{r cleaning pols-month, message = FALSE}
 pols_month_df = 
   read_csv("data/pols-month.csv") |> 
   janitor::clean_names() |> 
@@ -29,8 +29,8 @@ pols_month_df =
   select(-day, -prez_gop, -prez_dem)
 ```
 
-Cleaning data in `snp.csv`
-```{r, message = FALSE}
+Cleaning data in `snp.csv`, similar to the above procedure 
+```{r cleaning snp, message = FALSE}
 snp_df = 
   read_csv("data/snp.csv") |> 
   janitor::clean_names() |> 
@@ -47,7 +47,7 @@ snp_df =
 ```
 
 Pivoting `unemployment.csv` to long format
-```{r, message = FALSE}
+```{r pivoting unemployment, message = FALSE}
 unemployment_df = 
   read_csv("data/unemployment.csv") |> 
   janitor::clean_names() |> 
@@ -63,17 +63,23 @@ unemployment_df =
 ```
 
 Merging the 3 datasets
-```{r, message = FALSE}
+```{r merging, message = FALSE}
 result_df = left_join(pols_month_df,snp_df, by = c("year", "month")) |> 
   left_join(unemployment_df, by = c("year", "month"))
 ```
 
-TO DO: INSERT DESCRIPTION
+The `pols-month` dataset has `r nrow(pols_month_df)` observations and `r ncol(pols_month_df)` variables after cleaning. This dataset provides information on party affiliation and president information on different days throughout `r pull(pols_month_df, year) |> min()` to `r pull(pols_month_df, year) |> max()`.
+
+The `snp` dataset has `r nrow(snp_df)` observations and `r ncol(snp_df)` variables after cleaning, with data available from `r pull(snp_df, year) |> min()` to `r pull(snp_df, year) |> max()`.
+
+The `employment` dataset has `r nrow(unemployment_df)` observations and `r ncol(unemployment_df)` variables after cleaning, with data available from `r pull(unemployment_df, year) |> min()` to `r pull(unemployment_df, year) |> max()`.
+
+The combined dataset has `r nrow(result_df)` observations and `r ncol(result_df)` variables after cleaning, from the `NA`s in `close` and `unemployment` variable, we know some data are missing during those time. 
 
 ## Problem 2
 
-Read in the Mr. Trash Wheel sheet 
-```{r, message = FALSE}
+Read in the `Mr. Trash Wheel` sheet, clean names and remove unnecessary rows, add trash wheel identifying name, and recalculating homes powered 
+```{r reading Mr Trash Wheel, message = FALSE}
 trash_wheel_df = 
   readxl::read_excel("data/202309 Trash Wheel Collection Data.xlsx", 
                      sheet = "Mr. Trash Wheel", skip = 1) |> 
@@ -87,8 +93,8 @@ trash_wheel_df =
   )
 ```
 
-Read in professor trash wheel and gwynnda 
-```{r, message = FALSE}
+Read in professor trash wheel and gwynnda, perform similar cleaning as above 
+```{r cleaning prof and gwynnda, message = FALSE}
 gwynnda_trash_wheel_df = 
   readxl::read_excel("data/202309 Trash Wheel Collection Data.xlsx", 
                      sheet = "Gwynnda Trash Wheel", skip = 1) |> 
@@ -113,13 +119,18 @@ prof_trash_wheel_df =
 ```
 
 Combining three datasets
-```{r}
-trashwheel_master = bind_rows(trash_wheel_df, prof_trash_wheel_df, gwynnda_trash_wheel_df)
+```{r merging trash wheel, message = FALSE}
+trashwheel_master = bind_rows(trash_wheel_df, prof_trash_wheel_df, gwynnda_trash_wheel_df) |> select(trash_wheel_name = "trash_wheel_name", everything())
 ```
+The `Mr trash wheel` sheet has `r nrow(trash_wheel_df)` observations and `r ncol(trash_wheel_df)` columns. 
 
-TO DO: add descriptions to datasets 
+The `Professor Trash Wheel` sheet has `r nrow(prof_trash_wheel_df)` observations and `r ncol(prof_trash_wheel_df)` columns. 
 
-The combined master datasets for trash wheel has `r nrow(trashwheel_master)` rows and `r ncol(trashwheel_master)` columns. 
+The `Gwynnda Trash Wheel` sheet has `r nrow(gwynnda_trash_wheel_df)` observations and `r ncol(gwynnda_trash_wheel_df)` columns. 
+
+The combined master datasets for trash wheel has `r nrow(trashwheel_master)` observations and `r ncol(trashwheel_master)` columns. 
+
+These datasets record details of trash collected, with key variables such as dumpster id, date, weight, and litter type such as plastic bottles, cigarette butts, glass bottles, etc. There are missing data in `glass_bottles`, `sports balls` and `wrappers` in some column, meaning that these trash was not collected by those specific dumpsters. 
 
 The total weight of trash collected by Professor trash wheel is 
 `r subset(trashwheel_master, trash_wheel_name == "Professor Trash Wheel") |> pull(weight_tons) |> sum()` tons.
@@ -128,8 +139,8 @@ the total number of cigarette butts collected by Gwynnda in July of 2021 is
 `r subset(gwynnda_trash_wheel_df, year == 2021 & month == "July") |> pull(cigarette_butts) |> sum() |> as.integer()`.
 
 ## Problem 3
-Reading in baseline csv
-```{r}
+Reading in `baseline` csv, recode variables, remove ineligible participants 
+```{r reading baseline, message = FALSE}
 baseline = 
   read_csv("data/MCI_baseline.csv", skip = 1) |> 
   janitor::clean_names() |> 
@@ -148,7 +159,9 @@ baseline =
   filter(age_at_onset == "." | age_at_onset > current_age)
 ```
 
-`r nrow(baseline)` were recruited at baseline. 
+The important steps in importing this dataset is to recode binary variables and remove ineligible participants by removing all records whose onset for MCI is earlier or at the same age at baseline. `r 483 - nrow(baseline)` participants were removed, the demographics information at baseline is complete. 
+
+`r nrow(baseline)` participants were recruited at baseline. 
 
 `r filter(baseline, age_at_onset != ".") |> nrow()` participants developed MCI during the study.
 
@@ -157,30 +170,39 @@ The average baseline age is `r mean(pull(baseline, current_age)) |> round(digits
 Proportion of women who are APOE 4 carrier is 
 `r scales::percent(nrow(filter(baseline, sex == "female" & apoe4 =="carrier")) / nrow(filter(baseline, sex == "female")))`.
 
-```{r}
+Similarly, clean the `amyloid` set 
+```{r cleaning amyloid, message = FALSE}
 amyloid = 
   read_csv("data/mci_amyloid.csv", skip = 1) |> 
   janitor::clean_names() |> 
   rename("id" = "study_id")
 ```
 
-Merge the longitudinal dataset with baseline, keeping all participants in both datasets
-```{r}
+The import process is more straightforward, other than cleaning names, the study_id has to be renamed to match the `baseline` dataset to proceed with merge. There are `r nrow(amyloid)` participants in the longitudinal dataset, and MCI is recorded at baseline, time 2, time 4, time 6, and time 8. There are a significant amount of missing values meaning that many participants missed visits. 
+
+Merge the longitudinal dataset with baseline, keeping participants in either sets
+```{r merge full, message = FALSE}
 amyloid_full = 
   full_join(baseline, amyloid, by = c("id"))
 ```
 
-There are `r nrow(amyloid_full) - nrow(baseline)` participants in the baseline set but not in the amyloid set. 
+There are `r nrow(amyloid_full) - nrow(baseline)` participants in the amyloid set but not in the baseline set. 
 
-There are `r nrow(amyloid_full) - nrow(amyloid)` participants in the amyloid set but not in the baseline set. 
+There are `r nrow(amyloid_full) - nrow(amyloid)` participants in the baseline set but not in the amyloid set. 
 
 Merge the longitudinal dataset with baseline to keep those in both datasets
-```{r}
+```{r merge only in both, message = FALSE}
 amyloid_both = 
   inner_join(baseline, amyloid, by = c("id"))
 ```
 
 There are `r nrow(amyloid_both)` participants that are in both the baseline and longitudinal visit datasets, and there are `r ncol(amyloid_both)` columns. 
+
+Exporting the result dataframe to a csv file 
+```{r export to csv, message = FALSE}
+write.csv(amyloid_both, "data/baseline_amyloid_merged.csv", row.names = FALSE)
+```
+
 
 TO DO ask TA:
 
