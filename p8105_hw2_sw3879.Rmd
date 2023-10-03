@@ -75,7 +75,7 @@ TO DO: INSERT DESCRIPTION
 Read in the Mr. Trash Wheel sheet 
 ```{r, message = FALSE}
 trash_wheel_df = 
-  readxl::read_excel("data/202207 Trash Wheel Collection Data.xlsx", 
+  readxl::read_excel("data/202309 Trash Wheel Collection Data.xlsx", 
                      sheet = "Mr. Trash Wheel", skip = 1) |> 
    janitor::clean_names() |>
   drop_na(dumpster) |> 
@@ -90,7 +90,7 @@ trash_wheel_df =
 Read in professor trash wheel and gwynnda 
 ```{r, message = FALSE}
 gwynnda_trash_wheel_df = 
-  readxl::read_excel("data/202207 Trash Wheel Collection Data.xlsx", 
+  readxl::read_excel("data/202309 Trash Wheel Collection Data.xlsx", 
                      sheet = "Gwynnda Trash Wheel", skip = 1) |> 
    janitor::clean_names() |>
   drop_na(dumpster) |> 
@@ -101,7 +101,7 @@ gwynnda_trash_wheel_df =
   )
 
 prof_trash_wheel_df = 
-  readxl::read_excel("data/202207 Trash Wheel Collection Data.xlsx", 
+  readxl::read_excel("data/202309 Trash Wheel Collection Data.xlsx", 
                      sheet = "Professor Trash Wheel", skip = 1) |> 
    janitor::clean_names() |>
   drop_na(dumpster) |> 
