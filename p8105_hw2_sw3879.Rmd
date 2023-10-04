@@ -170,7 +170,7 @@ The average baseline age is `r mean(pull(baseline, current_age)) |> round(digits
 Proportion of women who are APOE 4 carrier is 
 `r scales::percent(nrow(filter(baseline, sex == "female" & apoe4 =="carrier")) / nrow(filter(baseline, sex == "female")))`.
 
-Similarly, clean the `amyloid` set, and pivot from wide to long format 
+Similarly, clean the `amyloid` set
 ```{r cleaning amyloid, message = FALSE}
 amyloid = 
   read_csv("data/mci_amyloid.csv", skip = 1) |> 
@@ -188,7 +188,7 @@ amyloid_long = amyloid |> pivot_longer(
 ```
 
 
-The import process is more straightforward, other than cleaning names, the study_id has to be renamed to match the `baseline` dataset to proceed with merge. There are `r nrow(amyloid)` participants in the longitudinal dataset, and MCI is recorded at baseline, time 2, time 4, time 6, and time 8. There are a significant amount of missing values meaning that many participants missed visits. 
+The import process is more straightforward, other than cleaning names, the study_id has to be renamed to match the `baseline` dataset to proceed with merge. The dataset is also pivoted to long format for easier analysis. There are `r nrow(amyloid)` participants in the longitudinal dataset, and MCI is recorded at baseline, time 2, time 4, time 6, and time 8. There are a significant amount of missing values meaning that many participants missed visits. The pivoted `amyloid` dataset has `r nrow(amyloid_long)` rows and `r ncol(amyloid_long)` columns.
 
 Merge the amyloid dataset with baseline, keeping participants in either sets
 ```{r merge full, message = FALSE}
@@ -214,11 +214,6 @@ write.csv(amyloid_both, "data/baseline_amyloid_merged.csv", row.names = FALSE)
 ```
 
 
-TO DO ask TA:
-
-1. Check whether some participants appear in only the baseline or amyloid datasets. Should we include participants who are ineligible?
-
-2. Similarly, import, clean, and tidy the dataset of longitudinally observed biomarker value. Should we remove rows with missing value in a timepoint? 
 
 
 
