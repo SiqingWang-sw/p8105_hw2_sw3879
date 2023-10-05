@@ -211,7 +211,7 @@ amyloid_both =
   inner_join(baseline, amyloid_long, by = c("id"))
 ```
 
-There are `r n_distinct(pull(amyloid_both, id))` participants that are in both the baseline and longitudinal visit datasets. There are `r nrow(amyloid_both)` rows and `r ncol(amyloid_both)` columns in the merged dataset. 
+There are `r n_distinct(pull(amyloid_both, id))` participants that are in both the baseline and longitudinal visit datasets. There are `r nrow(amyloid_both)` rows and `r ncol(amyloid_both)` columns in the merged dataset, key variables include id, age at baseline, sex, education, APOE4 carrier info, age at MCI onset, and the amyloid β42/40 ratio record at each visit. 
 
 The average amyloid β42/40 ratio at baseline is `r amyloid_both |> filter(visit == "baseline") |> pull(amyloid_ratio) |> mean(na.rm = TRUE)`. 
 
