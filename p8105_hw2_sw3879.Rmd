@@ -120,7 +120,9 @@ prof_trash_wheel_df =
 
 Combining three datasets
 ```{r merging trash wheel, message = FALSE}
-trashwheel_master = bind_rows(trash_wheel_df, prof_trash_wheel_df, gwynnda_trash_wheel_df) |> select(trash_wheel_name = "trash_wheel_name", everything())
+trashwheel_master = bind_rows(trash_wheel_df, prof_trash_wheel_df, 
+                              gwynnda_trash_wheel_df) |> select(
+                                trash_wheel_name = "trash_wheel_name", everything())
 ```
 The `Mr trash wheel` sheet has `r nrow(trash_wheel_df)` observations and `r ncol(trash_wheel_df)` columns. 
 
@@ -179,16 +181,19 @@ amyloid =
 ```
 
 Pivot `amyloid` from wide to long format
-```{r}
+```{r pivoting amyloid, message = FALSE, warning = FALSE}
 amyloid_long = amyloid |> pivot_longer(
   baseline:time_8,
   names_to = "visit",
   values_to = "amyloid_ratio"
-)
+) |> 
+  mutate(
+    amyloid_ratio = as.numeric(amyloid_ratio)
+  )
 ```
 
 
-The import process is more straightforward, other than cleaning names, the study_id has to be renamed to match the `baseline` dataset to proceed with merge. The dataset is also pivoted to long format for easier analysis. There are `r nrow(amyloid)` participants in the longitudinal dataset, and MCI is recorded at baseline, time 2, time 4, time 6, and time 8. There are a significant amount of missing values meaning that many participants missed visits. The pivoted `amyloid` dataset has `r nrow(amyloid_long)` rows and `r ncol(amyloid_long)` columns.
+The import process is more straightforward, other than cleaning names, the `study_id` variable has to be renamed to match the `baseline` dataset to proceed with merge. The dataset is also pivoted to long format for easier analysis. There are `r nrow(amyloid)` participants in the longitudinal dataset, and amyloid β42/40 ratio is recorded at baseline, time 2, time 4, time 6, and time 8. There are a significant amount of missing values meaning that many participants missed visits. The pivoted `amyloid_long` dataset has `r nrow(amyloid_long)` rows and `r ncol(amyloid_long)` columns.
 
 Merge the amyloid dataset with baseline, keeping participants in either sets
 ```{r merge full, message = FALSE}
@@ -196,17 +201,21 @@ amyloid_full =
   full_join(baseline, amyloid, by = c("id"))
 ```
 
-There are `r nrow(amyloid_full) - nrow(baseline)` participants in the amyloid set but not in the baseline set. 
+There are `r nrow(amyloid_full) - nrow(baseline)` participants in the amyloid dataset but not in the baseline dataset. 
 
-There are `r nrow(amyloid_full) - nrow(amyloid)` participants in the baseline set but not in the amyloid set. 
+There are `r nrow(amyloid_full) - nrow(amyloid)` participants in the baseline dataset but not in the amyloid dataset. 
 
-Merge the amyloid long format dataset with baseline to keep those in both datasets
+Merge the amyloid long format dataset with baseline to keep only those in both datasets
 ```{r merge only in both, message = FALSE}
 amyloid_both = 
   inner_join(baseline, amyloid_long, by = c("id"))
 ```
 
 There are `r n_distinct(pull(amyloid_both, id))` participants that are in both the baseline and longitudinal visit datasets. There are `r nrow(amyloid_both)` rows and `r ncol(amyloid_both)` columns in the merged dataset. 
+
+The average amyloid β42/40 ratio at baseline is `r amyloid_both |> filter(visit == "baseline") |> pull(amyloid_ratio) |> mean(na.rm = TRUE)`. 
+
+The average amyloid β42/40 ratio at the last visit is `r amyloid_both |> filter(visit == "time_8") |> pull(amyloid_ratio) |> mean(na.rm = TRUE)`. 
 
 Exporting the result dataframe to a csv file 
 ```{r export to csv, message = FALSE}
